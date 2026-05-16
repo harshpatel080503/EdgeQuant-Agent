@@ -1,7 +1,5 @@
 # EdgeQuant Agent: High-Conviction Hedge Fund PM
 
-![EdgeQuant Dashboard](edgequant_dashboard_mockup_1778827556427.png)
-
 ## Description
 **EdgeQuant Agent** is an autonomous AI trading system architected as a **High-Conviction Hedge Fund Portfolio Manager**. Built for the **CLEF 2026 Financial AI Challenge**, it transcends standard "HOLD-biased" agents by identifying dominant structural drivers through a combination of **FinMA-7B** (Finance-specialized LLM) and a sophisticated **Retrieval-Augmented Generation (RAG)** memory system.
 
@@ -34,30 +32,6 @@ The agent focuses on capturing **Alpha** by quantifying **Catalyst Magnitude** a
 | **Data Handling** | Pandas, NumPy, Scipy, Pydantic |
 | **Observability** | Loguru, Rich, Guardrails AI |
 | **Deployment** | Docker & Docker Compose |
-
----
-
-## Architecture
-The agent follows a modular architecture where the **Memory Engine** acts as the bridge between raw market data and the **LLM Reasoner**.
-
-```mermaid
-graph TD
-    subgraph Market Environment
-        A[News / Filings / Prices]
-    end
-
-    subgraph EdgeQuant Agent
-        B[Ingestion Module] --> C{Memory Engine}
-        C -->|Semantic Search| D[(Vector Store)]
-        D -->|Contextual Recall| E[LLM Reasoner: FinMA]
-        E -->|Catalyst Analysis| F[Decision Controller]
-        F --> G[Portfolio Manager]
-    end
-
-    G -->|CVXPY Optimization| H[Trade Execution]
-    H -->|BUY/SELL/HOLD| Market Environment
-    H -->|Post-Trade Reflection| D
-```
 
 ---
 
@@ -101,7 +75,7 @@ Create a `.env` file in the root directory to configure the agent:
 
 ---
 
-## 📈 Usage
+## Usage
 
 ### Phase 1: Warmup (Memory Ingestion)
 Builds the initial vector store by processing historical news and generating reflections.
