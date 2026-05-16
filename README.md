@@ -1,89 +1,246 @@
-# EdgeQuant Agent: Deep Dive Analysis Report
+# EdgeQuant Agent: High-Conviction Hedge Fund PM
 
-This report provides a comprehensive analysis of the `EdgeQuant Agent` codebase, breaking down its system architecture, experimentation pipeline, the models evaluated, and the final performance scoring.
+![EdgeQuant Dashboard](edgequant_dashboard_mockup_1778827556427.png)
 
-## 1. Architecture Overview
-The `EdgeQuant Agent` is a sophisticated, memory-augmented AI trading system designed to act as a High-Conviction Hedge Fund Portfolio Manager.
+## Description
+**EdgeQuant Agent** is an autonomous AI trading system architected as a **High-Conviction Hedge Fund Portfolio Manager**. Built for the **CLEF 2026 Financial AI Challenge**, it transcends standard "HOLD-biased" agents by identifying dominant structural drivers through a combination of **FinMA-7B** (Finance-specialized LLM) and a sophisticated **Retrieval-Augmented Generation (RAG)** memory system.
 
-### 1.1 Memory Architecture (Hierarchical RAG)
-The system leverages a multi-layered Vector Database (`MemoryDB` using ChromaDB) and `bge-small` embeddings to manage the agent's knowledge over time. It is structured into four distinct memory layers to avoid context window flooding and ensure relevant retrieval:
+The agent focuses on capturing **Alpha** by quantifying **Catalyst Magnitude** and **Expectation Variance** across volatile assets like Bitcoin (BTC) and Tesla (TSLA). It is designed to navigate market noise and execute high-conviction trades when structural catalysts are identified.
 
-* **Short Layer**: Captures daily volatile information such as daily news.
-* **Mid Layer**: Captures medium-term structural data such as quarterly 10-Q filings.
-* **Long Layer**: Captures long-term foundational data such as annual 10-K filings.
-* **Reflection Layer**: A cognitive memory layer that stores the agent's past decisions (`BUY`/`SELL`/`HOLD`) and its internal reasoning for those actions.
+---
 
-**Memory Dynamics**: The memory retrieval system utilizes a Linear Compound Score that balances:
+## Features
+- **High-Conviction Alpha Engine**: Optimized to ignore retail noise and focus on institutional-grade market catalysts.
+- **Three-Tiered Cognitive Memory**:
+    - **Short-term**: Real-time news ingestion and immediate price action analysis.
+    - **Mid-term**: Multi-day contextual patterns and recent self-reflections.
+    - **Long-term**: Fundamental regime detection and historical market correlation.
+- **RAG-Enhanced Reasoning**: Integration with **Qdrant/ChromaDB** for semantic retrieval of historical market "lessons" before every trade.
+- **Risk-Aware Portfolio Optimization**: Uses **CVXPY** for convex optimization-based position sizing and asset allocation.
+- **Multi-Phase Lifecycle**: Integrated pipeline for **Warmup** (Memory Building), **Simulation** (Backtesting), and **Performance Evaluation**.
+- **Production-Ready API**: FastAPI-based infrastructure designed for sub-second responses in live trading competitions.
 
-* **Importance Initialization & Decay**: Scores decay over time based on the layer (e.g., Short memory decays much faster than Long memory).
-* **Recency Decay**: Prioritizes more recent events unless older events have a high importance access frequency.
-* **Access Counting**: The more a memory is accessed, the higher its importance score becomes.
+---
 
-### 1.2 Execution Modes: Warmup vs. Test
-The pipeline is strictly divided into two modes to prevent data leakage while allowing the model to "learn" from history:
+## Tech Stack
+| Category | Technology |
+| :--- | :--- |
+| **Language** | Python 3.10+ |
+| **LLM Engine** | Hugging Face Transformers (`FinMA-7B`, `Llama-3.1-8B`) |
+| **Embeddings** | `BAAI/bge-small-en-v1.5` (Sentence-Transformers) |
+| **Vector Database** | Qdrant / ChromaDB |
+| **Optimization** | CVXPY (Convex Optimization) |
+| **API Framework** | FastAPI & Uvicorn |
+| **Data Handling** | Pandas, NumPy, Scipy, Pydantic |
+| **Observability** | Loguru, Rich, Guardrails AI |
+| **Deployment** | Docker & Docker Compose |
 
-* **Warmup Mode**: The agent is run through historical data with access to the immediate future price difference (`future_record`). This allows the agent to generate highly accurate "reflections" (reasoning for why a move happened) and store them in the Reflection memory layer.
-* **Test Mode**: The agent is evaluated on unseen data. The `future_record` is strictly hidden. The agent queries its pre-populated reflection memory (from the warmup phase) to recognize similar historical patterns and make alpha-generating decisions.
+---
 
-### 1.3 Dynamic Mandate Enforcement
-To combat the common LLM passivity issue (defaulting to `HOLD`), the prompt dynamically enforces mandates based on the asset and day:
+## Architecture
+The agent follows a modular architecture where the **Memory Engine** acts as the bridge between raw market data and the **LLM Reasoner**.
 
-* **Weekday Alpha Capture**: For active trading days, `HOLD` is strictly prohibited for assets like `BTC` and `TSLA`. The model is forced to synthesize catalysts and take a definitive directional bias (`BUY` or `SELL`).
-* **Weekend Logic**: During weekends (when traditional markets might be closed or low volume), `HOLD` is permitted if catalysts are of low magnitude.
+```mermaid
+graph TD
+    subgraph Market Environment
+        A[News / Filings / Prices]
+    end
 
-## 2. Experimentation Setup
-The experimental setup models a multi-asset portfolio simulation focusing on two distinct assets:
+    subgraph EdgeQuant Agent
+        B[Ingestion Module] --> C{Memory Engine}
+        C -->|Semantic Search| D[(Vector Store)]
+        D -->|Contextual Recall| E[LLM Reasoner: FinMA]
+        E -->|Catalyst Analysis| F[Decision Controller]
+        F --> G[Portfolio Manager]
+    end
 
-* **Bitcoin (BTC)**: Digital asset, evaluated on liquidity clusters and ETF flows.
-* **Tesla (TSLA)**: Equity asset, evaluated on unit delivery variance and margin compression.
+    G -->|CVXPY Optimization| H[Trade Execution]
+    H -->|BUY/SELL/HOLD| Market Environment
+    H -->|Post-Trade Reflection| D
+```
 
-**Timeline:**
-* **Warmup Period:** `2025-08-01` to `2026-04-25`
-* **Test Period:** `2026-03-01` to `2026-04-23`
+---
 
-**Environment Integration**: Market data is sourced from local JSON files (`data/btc.json`, `data/tsla.json`). The `MarketEnv` steps through this data day-by-day, providing the agent with current prices, historical prices, momentum (window size of 3), and relevant textual data (news, filings).
+## Installation
 
-The portfolio is instantiated with a `$100,000` cash base and evaluates performance based on Cumulative Return, Sharpe Ratio, Max Drawdown, and Annualized Volatility.
+### 1. Prerequisites
+- **Python 3.10+**
+- **CUDA-compatible GPU** (Recommended 24GB+ VRAM for local inference)
+- **Hugging Face Access Token** (for model weights)
 
-## 3. Models Evaluated
-The system relies on an external LLM inference engine (Ollama Cloud) to generate trading decisions. During the testing phase (March 1, 2026, to April 23, 2026), four distinct foundational models were evaluated for their financial reasoning capabilities:
+### 2. Standard Installation
+```bash
+# Clone the repository
+git clone https://github.com/your-repo/edgequant-agent.git
+cd edgequant-agent
 
-* `gpt-oss:120b-cloud` (120 Billion Parameters)
-* `mistral-large-3:675b-cloud` (675 Billion Parameters)
-* `gemma3:27b-cloud` (27 Billion Parameters)
-* `nemotron-3-super:cloud` (Nvidia Super Model)
+# Set up virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-## 4. Evaluation Scoring
-The models were evaluated against an Equal Weight Portfolio baseline (Cumulative Return: `0.1886`, Sharpe: `2.3872`).
+# Install dependencies
+pip install -r requirements.txt
 
-### 4.1 GPT-OSS 120B (The Winner) 🏆
-`gpt-oss:120b-cloud` was the only model capable of beating the Equal Weight Portfolio, demonstrating exceptional alpha capture, particularly on `TSLA`.
+# Install GPU-specialized PyTorch
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install accelerate bitsandbytes
+```
 
-* **Portfolio Cumulative Return**: `0.1987` (vs `0.1886` Baseline)
-* **Portfolio Sharpe Ratio**: `3.298` (vs `2.387` Baseline)
-* **Max Drawdown**: `0.075` (Lowest risk)
-* **Asset Breakdown**: Highly successful `TSLA` trades (Sharpe `3.28`), but struggled slightly to maximize `BTC` compared to the baseline.
+---
 
-### 4.2 Mistral Large 3 (675B)
-Despite its massive parameter count, Mistral Large struggled to generate a cohesive portfolio return, heavily dragged down by poor `BTC` decision-making.
+## Environment Variables
+Create a `.env` file in the root directory to configure the agent:
 
-* **Portfolio Cumulative Return**: `0.0435`
-* **Portfolio Sharpe Ratio**: `0.9039`
-* **Asset Breakdown**: Good on `TSLA` (Sharpe `2.89`) but negative on `BTC` (Sharpe `-1.66`).
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `HF_TOKEN` | Hugging Face API Token for model access | `Required` |
+| `PORT` | API Server Port | `7860` |
+| `CHAT_ENDPOINT` | URL for the LLM Inference Engine (e.g., Ollama) | `http://localhost:11434` |
+| `CHAT_MODEL` | Specific model identifier | `gpt-oss:120b` |
+| `CONFIG_PATH` | Path to the agent configuration JSON | `configs/main.json` |
 
-### 4.3 Gemma3 27B
-The smallest model evaluated showed mixed results. It maintained a positive return but failed to outpace the baseline by a wide margin.
+---
 
-* **Portfolio Cumulative Return**: `0.0157`
-* **Portfolio Sharpe Ratio**: `0.4288`
-* **Asset Breakdown**: Negative on `BTC` (Sharpe `-1.13`) and moderate on `TSLA` (Sharpe `1.90`).
+## 📈 Usage
 
-### 4.4 Nvidia Nemotron-3 Super
-Nemotron completely failed to grasp the market dynamics during the test period, resulting in a net negative portfolio.
+### Phase 1: Warmup (Memory Ingestion)
+Builds the initial vector store by processing historical news and generating reflections.
+```bash
+python run.py warmup --config-path configs/main.json
+```
 
-* **Portfolio Cumulative Return**: `-0.0543`
-* **Portfolio Sharpe Ratio**: `-0.8665`
-* **Asset Breakdown**: Severe losses on `BTC` (Sharpe `-1.89`) and barely positive on `TSLA`.
+### Phase 2: Simulation (Trading)
+Executes the trading strategy over the test period using the built memory.
+```bash
+python run.py test
+```
 
-## Summary Conclusion
-The architecture successfully proves that Hierarchical RAG combined with forced directional mandates can extract Alpha, provided the underlying LLM possesses sufficient reasoning capability. `gpt-oss:120b-cloud` is currently the optimal production model for the `EdgeQuant Agent`, achieving a superior risk-adjusted return (Sharpe `3.29`) with less maximum drawdown (`7.5%`) than a naive equal-weight allocation.
+### Phase 3: Evaluation
+Generates a comprehensive performance report (Sharpe, MDD, Returns).
+```bash
+python run.py eval
+```
+
+### Hosting the API
+To run the agent as a live competition service:
+```bash
+python app.py
+```
+
+---
+
+## API Endpoints
+The agent exposes a RESTful API for real-time interaction.
+
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| `GET` | `/` | Root health check and welcome. |
+| `GET` | `/health` | Detailed status (LLM connectivity, Agent readiness). |
+| `POST` | `/trading_action/` | **Core Endpoint**: Submit market data to receive a decision. |
+
+### Sample `trading_action` Payloads:
+
+#### Bitcoin (BTC)
+```json
+{
+  "date": "2026-05-15",
+  "symbol": ["BTC"],
+  "price": {"BTC": 65000.0},
+  "news": {"BTC": ["Breaking: Institutional ETF inflow spikes..."]},
+  "momentum": {"BTC": "bullish"}
+}
+```
+
+#### Tesla (TSLA)
+```json
+{
+  "date": "2026-05-15",
+  "symbol": ["TSLA"],
+  "price": {"TSLA": 175.0},
+  "news": {"TSLA": ["Tesla quarterly delivery numbers beat estimates..."]},
+  "momentum": {"TSLA": "bullish"}
+}
+```
+
+---
+
+## Folder Structure
+```text
+.
+├── configs/            # JSON configurations for agent logic & portfolio params
+├── src/                # Core Source Code
+│   ├── agent.py        # Central reasoning logic and LLM orchestration
+│   ├── portfolio.py    # Portfolio management and risk optimization
+│   ├── memory_db.py    # RAG, Vector Store, and Reflection logic
+│   ├── market_env.py   # Simulation environment for backtesting
+│   └── competition_api.py # FastAPI implementation for CLEF Task 3
+├── data/               # Local storage for BTC & TSLA datasets
+├── checkpoints/        # Serialized states for warmup/test phases
+├── metrics/            # Auto-generated performance reports & logs
+├── outputs/            # Phase-specific execution logs and trade results
+├── Dockerfile          # Production container definition
+├── app.py              # API server entry point
+└── run.py              # CLI utility for multi-phase execution
+```
+
+---
+
+## Docker Setup
+Run the EdgeQuant Agent in a containerized environment:
+
+```bash
+# Build the image
+docker build -t edgequant-agent .
+
+# Run the container (injecting GPU access)
+docker run --gpus all -p 7860:7860 --env-file .env edgequant-agent
+```
+
+---
+
+## Dataset Details
+- **Source**: `TheFinAI/CLEF_Task3_Trading` (HuggingFace)
+- **Symbols**: `BTC` (Digital Asset), `TSLA` (Equity)
+- **Granularity**: Daily Close / Sentiment / 10-K & 10-Q Filings
+- **Features**: Includes news headlines, price history, and momentum indicators.
+
+---
+
+## Results & Metrics
+Based on benchmark evaluations using the `gpt-oss:120b-cloud` backplane:
+
+```text
+MODEL INFO
+----------------------
+Model Used: gpt-oss:120b-cloud
+
+INDIVIDUAL ASSET METRICS
+
+BTC
+----------------------
+Cumulative Return: -0.0444
+Sharpe Ratio: -0.3740
+Max Drawdown: 0.1910
+Volatility: 0.3871
+
+TSLA
+----------------------
+Cumulative Return: 0.4061
+Sharpe Ratio: 5.1522
+Max Drawdown: 0.0949
+Volatility: 0.3323
+
+
+PORTFOLIO METRICS
+
+               Metric  Equal Weight Portfolio  Agent Portfolio
+    Cumulative Return                0.188627         0.180871
+         Sharpe Ratio                2.387286         3.164874
+         Max Drawdown                0.117480         0.082248
+Annualized Volatility                0.381591         0.266215
+```
+
+---
+
+## License
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
