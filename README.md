@@ -61,7 +61,7 @@ SEC filings, price dynamics, and large language model reasoning into daily BUY /
 
 ## 🧠 Project Overview
 
-**EdgeQuant Agent** is a production-grade autonomous trading system designed for the [FinMMEval 2026 Task 3](https://clef2026.clef-initiative.eu/) benchmark at CLEF 2026. It solves a fundamental challenge in LLM-based financial agents: **temporal amnesia** (inability to consolidate knowledge across sessions) and **HOLD bias** (risk-averse neutrality under uncertainty).
+**EdgeQuant Agent** is a production-grade autonomous trading system designed for the [FinMMEval 2026 Task 3]([https://clef2026.clef-initiative.eu/](https://mbzuai-nlp.github.io/CLEF-2026-FinMMEval-Lab/)) benchmark at CLEF 2026. It solves a fundamental challenge in LLM-based financial agents: **temporal amnesia** (inability to consolidate knowledge across sessions) and **HOLD bias** (risk-averse neutrality under uncertainty).
 
 The agent fuses four streams of financial intelligence — real-time news, SEC quarterly filings, SEC annual filings, and its own past decisions — into a persistent ChromaDB vector store. At each trading day, it performs semantic retrieval across all four layers, injects asset-specialised expert personas, and fires a structured prompt to an LLM to generate a daily **BUY / HOLD / SELL** decision for **BTC** and **TSLA**.
 
@@ -796,7 +796,7 @@ git push origin feature/your-feature-name
 
 - **FinMMEval 2026 Organisers** — For the competition infrastructure, dataset, and Agent Market Arena evaluation platform
 - **TheFinAI Team** — For the [`CLEF_Task3_Trading`](https://huggingface.co/datasets/TheFinAI/CLEF_Task3_Trading) dataset
-- **MBZUAI** — For hosting the [`finmmeval-lab-clef2026`](https://huggingface.co/MBZUAI/finmmeval-lab-clef2026) collection
+- **MBZUAI** — For hosting the [`finmmeval-lab-clef2026`]([https://huggingface.co/MBZUAI/finmmeval-lab-clef2026](https://mbzuai-nlp.github.io/CLEF-2026-FinMMEval-Lab/)) collection
 - **ChromaDB** — For the open-source vector store powering the memory system
 - **CVXPY** — For the convex optimisation framework
 - **Hugging Face** — For the sentence-transformers and datasets ecosystem
