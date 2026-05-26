@@ -135,41 +135,9 @@ Competition Server → POST /trading_action/ → EdgeQuant Agent → {"recommend
 
 ## 🏗️ System Architecture
 
-```mermaid
-flowchart TD
-    A[Competition Server] -->|POST /trading_action/| B[FastAPI API\nPort 7860 · Docker]
-
-    B --> C[MarketEnv\nPayload Parser]
-
-    C -->|News Digest| D1[SHORT LAYER\nα=0.90 · τ=10]
-    C -->|SEC 10-Q| D2[MID LAYER\nα=0.95 · τ=20]
-    C -->|SEC 10-K| D3[LONG LAYER\nα=0.98 · τ=50]
-    C -->|Price + Momentum| E
-
-    D1 & D2 & D3 & D4 -->|RAG · Top-5 per layer| E[Prompt Builder\n8-Block Structure]
-
-    subgraph MEM [" 🧠 ChromaDB · BAAI/bge-small-en-v1.5 · 384-dim "]
-        D1
-        D2
-        D3
-        D4[REFLECTION LAYER\nα=0.95 · τ=20\n⚠ mode≠warmup filter]
-    end
-
-    E --> F[LLM Inference\nGPT-OSS-120B · Mistral · Gemma3]
-
-    subgraph LLM [" 🤖 LLM Reasoning Engine "]
-        F --> G[3-Stage Parser\nJSON → KV → Keyword]
-    end
-
-    G -->|Decision + Reasoning| H[Reflection Writer]
-    H -->|Embed & Store| D4
-
-    G -->|BUY / HOLD / SELL| I[Portfolio Manager\nCVXPY · Markowitz · Ledoit-Wolf]
-    I -->|HTTP 200| J[recommended_action]
-
-    style MEM fill:#1e1b4b,stroke:#8B5CF6,color:#c4b5fd
-    style LLM fill:#0f2d2d,stroke:#14B8A6,color:#99f6e4
-```
+<p align="center">
+  <img src="Edgequant Agent/System Architecture/System Architecture.png" alt="System Architecture" width="1000"/>
+</p>
 
 ---
 
@@ -760,6 +728,14 @@ EdgeQuant Agent was developed as part of a research submission to **CLEF 2026 Fi
 | 🟡 Medium | **Memory ablation framework** | Isolate each memory tier's individual Sharpe Ratio contribution via systematic ablation |
 | 🟢 Low | **Portfolio optimiser integration** | Connect CVXPY weights fully to fractional position sizing instead of binary long/flat/short |
 | 🟢 Low | **Multilingual news support** | Extend to non-English financial news via NLLB-200 translation layer |
+
+---
+
+## 👨‍💻 Team Members
+*   **URVI KAVA** — Researcher & Scientist
+*   **HARSH PATEL** — Researcher & Scientist
+*   **THOMAS MANDL** - Researcher & Scientist
+*   **SANDIP MODHA** - Researcher & Scientist
 
 ---
 
