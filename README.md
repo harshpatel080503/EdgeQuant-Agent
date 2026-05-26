@@ -796,7 +796,7 @@ git push origin feature/your-feature-name
 
 - **FinMMEval 2026 Organisers** — For the competition infrastructure, dataset, and Agent Market Arena evaluation platform
 - **TheFinAI Team** — For the [`CLEF_Task3_Trading`](https://huggingface.co/datasets/TheFinAI/CLEF_Task3_Trading) dataset
-- **MBZUAI** — For hosting the [`finmmeval-lab-clef2026`]([https://huggingface.co/MBZUAI/finmmeval-lab-clef2026](https://mbzuai-nlp.github.io/CLEF-2026-FinMMEval-Lab/)) collection
+- **MBZUAI** — For hosting the [`finmmeval-lab-clef2026`](https://mbzuai-nlp.github.io/CLEF-2026-FinMMEval-Lab/) collection
 - **ChromaDB** — For the open-source vector store powering the memory system
 - **CVXPY** — For the convex optimisation framework
 - **Hugging Face** — For the sentence-transformers and datasets ecosystem
