@@ -763,25 +763,7 @@ EdgeQuant Agent was developed as part of a research submission to **CLEF 2026 Fi
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome from AI engineers, quant developers, and open-source researchers.
-
-### Contribution Workflow
-
-```bash
-# 1. Fork the repository
-# 2. Create a feature branch
-git checkout -b feature/your-feature-name
-
-# 3. Make your changes with clear commits
-git commit -m "feat: add conditional HOLD gate for BTC based on 20-day momentum"
-
-# 4. Push and open a Pull Request
-git push origin feature/your-feature-name
-```
-
-### Contribution Areas
+## Contribution Areas
 
 - 🧠 **Memory System** — Improved scoring formulas, new memory layers
 - 🤖 **LLM Integration** — New model backends, better prompt engineering
